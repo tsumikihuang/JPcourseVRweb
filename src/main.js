@@ -7,15 +7,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 Vue.config.productionTip = false
 
-/*new Vue({
-  el: '#_application',
-  //components: { App },
-  template: '<App/>'
-})*/
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-//var boot=require("bootstrap");
 var $ = require("jquery");
 var now_id = 0;
 var getJSON = function () {
@@ -30,7 +21,7 @@ var getJSON = function () {
 };
 var TOKEN_start = getJSON();
 TOKEN_start.then(function (data) {
-  console.log(data);
+  //console.log(data);
   $('#json_num').html(data.course_length);
 
   var all_course = "";
@@ -44,13 +35,6 @@ TOKEN_start.then(function (data) {
         + "個問答</small></div><span class=\"text-success\">"
         + data.courses[i].clips[data.courses[i].clips_len - 1].time
         + "s</span></li>";
-      $('#now_name').html(data.courses[i].name);//XXXXXXXXXXXX
-      //form
-      $('#form_name').html(data.courses[i].name);//XXXXXXXXXXXX
-      $('#form_name').html(data.courses[i].name);
-      $('#form_name').html(data.courses[i].name);
-      $('#form_name').html(data.courses[i].name);
-      $('#form_name').html(data.courses[i].name);
     } else {
       all_course +=
         "<li onclick=\"document.getElementById('courseID_" + i + "').scrollIntoView();\" class=\"list-group-item d-flex justify-content-between lh-condensed\"><div><h6 class=\"my-0\">"
@@ -112,9 +96,9 @@ TOKEN_start.then(function (data) {
       },
       add_ans: function (course_id, clip_id) {
         this.vue.courses[course_id].clips[clip_id].ans.push("");
-      },
+      }
 
-      save_file: function () {
+      /*save_file: function () {
         this.vue.course_length = this.vue.courses.length;
 
         this.vue.courses.forEach(course_element => {
@@ -124,10 +108,64 @@ TOKEN_start.then(function (data) {
           });
         });
         this.vue.course_length = this.vue.courses.length;
-        fs.writeFileSync(__dirname+"Clips.json", JSON.stringify(this.vue));
-      },
+        fs.writeFileSync(__dirname + "Clips.json", JSON.stringify(this.vue));
+      }*/
     }
   });
+
+  /////////////////////////////////////////////////////////////////////////////////////////////
+  //__________________________________Github API_____________________________________________//
+  window.Submit = function () {
+    var x = document.getElementById('modalForm').checkValidity();
+    if (!x) {
+      //console.log('Form Not Valid');
+      alert("尚有欄位空白，請再檢查一次。");
+      return;
+    }
+    let commitText1= $('#commitText1').val();
+    let commitText2= $('#commitText2').val();
+    let commitText3= $('#commitText3').val();
+    let token= $('#token').value;
+    //先獲取sha
+    var getSHA = function () {
+      return $.ajax({
+        url: "https://api.github.com/repos/VRTeachingMaterial/JPcourse_JSON/contents/test.json",
+        type: "GET",
+        dataType: "json",
+        error: function () {
+          alert("ERROR!!!");
+        }
+      })
+    };
+    var AJAX_start = getSHA();
+    //console.log("https://api.github.com/repos/VRTeachingMaterial/JPcourse_JSON/contents/JPcourse.json?access_token="+$('#token').val());
+    //console.log(window.btoa(unescape(encodeURIComponent(JSON.stringify(data,undefined,1)))));
+    AJAX_start.then(function (data2) {
+      var put_data = {
+        "message": commitText1+" / "+commitText2+" / "+commitText3,             // 檔案的備註資訊
+        //"content": data,                // base64 編碼
+        "content": window.btoa(unescape(encodeURIComponent(JSON.stringify(data,undefined,1)))),                // base64 編碼
+        //"content": "bXkgbmV3IGZpbGUgY29udGVudHM=",                        //bXkgbmV3IGZpbGUgY29udGVudHM=
+        "sha": data2.sha
+      };
+      $.ajax({
+        type: "put",
+        url: "https://api.github.com/repos/VRTeachingMaterial/JPcourse_JSON/contents/JPcourse.json?access_token="+$('#token').val(),
+        headers: {
+          "Content-Type": "application/json"  // 指定送出資料為 json 格式
+        },
+        data: JSON.stringify(put_data),       // 一定要將物件轉成字串才會被接受
+        success: function (json) {
+          //console.log("good! " + JSON.stringify(json));
+          alert("SUCCESS!!!");
+        },
+        error: function (json) {
+          alert("上傳失敗，通關密語有誤。");
+          //console.log("error! " + JSON.stringify(json));
+        }
+      });
+    });
+  }
 });
 
 
@@ -153,3 +191,16 @@ TOKEN_start.then(function (data) {
     });
   }, false);
 })();
+
+//提交按鈕
+window.PushCommit = function() {
+  var x = document.getElementById('myForm').checkValidity();
+  if (x) {
+    //console.log('Form Valid!!!!!!!!!!!!!!!!!!!')
+    $('#pushModal').modal('show');
+
+  } else {
+    //console.log('Form Not Valid');
+    alert("尚有欄位空白，請再檢查一次。");
+  }
+}

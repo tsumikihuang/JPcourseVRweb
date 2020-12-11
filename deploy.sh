@@ -13,6 +13,7 @@ git add -A
 git commit -m 'deploy'
 
 # 部署到 https://tsumikihuang.github.io/JPcourseVRweb.git 分支為 gh-pages，https://<USERNAME>.github.io/<REPO>
+# git push -f git@github.com:<USERNAME>/<REPO>.git master:gh-pages
 git push -f git@github.com:tsumikihuang/JPcourseVRweb.git master:gh-pages
 
 #將dist資料夾中的內容推送至遠端eric-project的gh-pages分支中，並強制無條件將舊有的內容取代成目前的內容（指令 git push -f)

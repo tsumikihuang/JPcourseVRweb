@@ -3,18 +3,13 @@
 
 <head>
   <meta charset="utf-8">
-  <meta name="description" content="">
+  <meta name="description" content="yzu_jp_course_VR_json_student_edit_web">
   <meta name="author" content="tsumikihuang">
-  <link rel="icon" href="./src/assets/LOGO.png">
+
+  <link rel='icon' href="https://github.com/tsumikihuang/JPcourseVRweb/blob/main/src/assets/LOGO.png">
 
   <title>修改表單</title>
 
-  <!-- Bootstrap core CSS 
-  <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css">
-  <script src="./node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
--->
   <style>
     .m_list-group {
       max-height: 85vh;
@@ -33,21 +28,22 @@
 
     <div class="row">
       <div class="col-8">
-        <img class="d-block mx-auto mb-4" src="./src/assets/四個人.png" alt="" width=100%>
+        <!--<div id="DeveloperPicture"></div>-->
+        <img class="d-block mx-auto mb-4" src="https://github.com/tsumikihuang/JPcourseVRweb/blob/main/src/assets/Developer.png" alt="" width=100%>
         <div class="text-center">
           <h2>語言練習VR教室</h2><br>
           <p class="lead">新增修改課程，修改完畢送出後，間隔5分鐘後查看測試。<br />若有問題或資料回復，請洽工程師。(202011)</p>
-          <button v-on:click="save_file();">save_file</button>
+          <!--<button v-on:click="save_file();">save_file</button>-->
         </div>
 
-        <form id="courseID" class="needs-validation" novalidate>
+        <form id="myForm" class="needs-validation" onsubmit="return false;" novalidate>
 
           <div class="jumbotron" v-bind:id="'courseID_'+courseID" v-for="(courses_item, courseID) in vue.courses">
             <div class="row">
               <div class="col-md-9 mb-3 text-info">
                 <h1>{{courses_item.name}}</h1>
               </div>
-              <div class="col-md-3 mb-3"><button type="button" class="btn btn-outline-danger float-right" id="del_QA"
+              <div class="col-md-3 mb-3"><button type="button" class="btn btn-outline-danger float-right"
                   v-on:click="delete_course(courseID);">刪除課程</button></div>
             </div>
 
@@ -113,7 +109,7 @@
                   <li v-for="(ans_item, ansID) in vue.courses[courseID].clips[clipID].ans">
                     <div v-bind:id="ansID" class="input-group mb-3">
                       <input type="text" class="form-control" aria-label="Recipient's username"
-                        aria-describedby="basic-addon2" v-model="clip_item.ans[ansID]">
+                        aria-describedby="basic-addon2" v-model="clip_item.ans[ansID]" required>
                       <div class="input-group-append">
                         <button class="btn btn-outline-danger" type="button"
                           v-on:click="delete_ans(courseID,clipID,ansID);">刪除</button>
@@ -133,7 +129,11 @@
           <!--_____________________________________________________________________________________________-->
           <!--_____________________________________________________________________________________________-->
           <!--_____________________________________________________________________________________________-->
-          <button href="#" class="btn btn-primary btn-lg btn-block" type="submit">確定上方的所有變更，提交課程</button>
+          <button class="btn btn-primary btn-lg btn-block" type="submit" id="pushCommit"
+            onclick="PushCommit();">確定上方的所有變更，提交課程</button>
+          <!-- hidden submit button -->
+          <button type="button" id="triggerModal" hidden value="Submit" data-toggle="modal"
+            data-target="#pushModal"></button>
           <br />
         </form>
       </div>
@@ -148,6 +148,46 @@
             <ul class="list-group mb-3 " id="json_all_course"></ul>
           </div>
 
+        </div>
+      </div>
+
+      <!-------提交確認視窗------->
+      <div class="modal fade" id="pushModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <form id="modalForm" onsubmit="return false;" novalidate>
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">提交資訊</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                你的學號 :
+                <input type="text" id="commitText1" class="form-control" placeholder="ex. 1053320" required>
+                <div class="invalid-feedback">你忘了它!</div>
+
+                你的名字 :
+                <input type="text" id="commitText2" class="form-control" placeholder="ex. 黃莉婷" required>
+                <div class="invalid-feedback">你忘了它!</div>
+
+                備註 :
+                <input type="text" id="commitText3" class="form-control" placeholder="ex. 修改新增課程-賣場的答案" required>
+                <div class="invalid-feedback">你忘了它!</div>
+
+                通關密語 (為提高安全性的必要選項。若不清楚，請跟助教索取) :
+                <input type="text" id="token" class="form-control"
+                  placeholder="ex. faa1f6346fe5830df9f077aa00a0d67dad124332" required>
+                <div class="invalid-feedback">你忘了它!</div>
+
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">返回編輯</button>
+                <button type="button" class="btn btn-primary" type="submit" onclick="Submit()">確認送出</button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
 
